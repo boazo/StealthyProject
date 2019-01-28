@@ -4,7 +4,7 @@ using UnityEngine;
 
 using MazeProject;
 namespace BorderMazeGenerator {
-  public class SimpleMazeGenerator : MonoBehaviour {
+  public class BorderMazeGenerator : MonoBehaviour {
     public int NumRows;
     public int NumCols;
     public GameObject theMaze;

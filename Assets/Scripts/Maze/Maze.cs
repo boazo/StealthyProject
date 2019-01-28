@@ -45,8 +45,8 @@ namespace MazeProject {
     Dictionary<ColRow, GameObject> ColRowToGameObjects = new Dictionary<ColRow, GameObject>(new ColRowEqualityComparer());
 
     public void InitMaze(int numRows, int numCols) {
-      NumRows = numRows * 2 + 1;
-      NumCols = numCols * 2 + 1;
+      NumRows = numRows;
+      NumCols = numCols;
 
       Grid = new CellType[NumRows, NumCols];
       for (int i = 0; i < NumRows; i++) {
