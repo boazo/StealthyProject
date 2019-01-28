@@ -1,6 +1,6 @@
 # StealthyProject
 
-Stealthy is a Unity3d project that is used thoughtout the תעשידע project.
+Stealthy is a Unity3d project that is used throughout the תעשידע project.
 
 
 # How to setup the enviornment
