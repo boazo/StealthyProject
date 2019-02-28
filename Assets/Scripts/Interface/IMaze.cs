@@ -23,10 +23,10 @@ namespace MazeProject {
     // returns the content of the cell[row][col]
     CellType GetCellType(int row, int col);
     
-    // returns the number of rows the maze of initialized to
+    // returns the number of rows the maze was initialized to
     int GetNumRows();
     
-    // returns the number of columns the maze of initialized to
+    // returns the number of columns the maze was initialized to
     int GetNumColumns();
   }
 }
