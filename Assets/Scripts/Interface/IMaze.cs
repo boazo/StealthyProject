@@ -1,10 +1,19 @@
-﻿namespace MazeProject {
+﻿using System.Collections.Generic;
+
+namespace MazeProject {
   /*
    * CellType enum is used to indicate the content of the cell
    */
   public enum CellType {
     CELL_IS_EMPTY,
     CELL_IS_WALL,
+  }
+
+  public enum MoveCommand {
+    MOVE_UP,
+    MOVE_DOWN,
+    MOVE_LEFT,
+    MOVE_RIGHT
   }
 
   /*
@@ -32,6 +41,12 @@
     // sets the content of the cell[row][col]
     void SetCellType(int row, int col, CellType type);
 
+    // sets the start and end points
+    void SetStartEndPoints(int srow, int scol, int erow, int ecol);
+
+    // returns the coordinates of the start and end points
+    void GetStartEndPoints(ref int srow, ref int scol, ref int erow, ref int ecol);
+
     // returns the content of the cell[row][col]
     CellType GetCellType(int row, int col);
 
@@ -47,5 +62,8 @@
 
     // returns the number of columns the maze was initialized to
     int GetNumColumns();
+
+    // try to solve the maze with the list of commands
+    bool SolveMaze(List<MoveCommand> commands);
   }
 }

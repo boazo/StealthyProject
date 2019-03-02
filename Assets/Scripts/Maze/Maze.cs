@@ -9,12 +9,22 @@ namespace MazeProject {
     [Tooltip("A wall in the maze")]
     public GameObject WallPrefab;
 
+    private int StartRow;
+    private int StartCol;
+    private int EndRow;
+    private int EndCol;
+
     private int NumRows;
     private int NumCols;
 
     private CellType[,] Grid;
     
     private float CellSize;
+
+    private List<MoveCommand> commands;
+    private int curCmdIndex = 0;
+    private bool solveMaze = false;
+    private bool executeNextCmd = false;
 
     class ColRow {
       public ColRow(int r, int c) {
@@ -171,6 +181,84 @@ namespace MazeProject {
         writer.Write(writer.NewLine);
       }
       writer.Close();
+    }
+
+    // sets the start and end points
+    public void SetStartEndPoints(int srow, int scol, int erow, int ecol) {
+      StartRow = srow;
+      StartCol = scol;
+      EndRow = erow;
+      EndCol = ecol;
+    }
+
+    // returns the coordinates of the start and end points
+    public void GetStartEndPoints(ref int srow, ref int scol, ref int erow, ref int ecol) {
+      srow = StartRow;
+      scol = StartCol;
+      erow = EndRow;
+      ecol = EndCol;
+    }
+
+    private bool CheckSolution() {
+      int curRow = StartRow;
+      int curCol = StartCol;
+      for (int i = 0; i < commands.Count; i++) {
+        switch (commands[i]) {
+          case MoveCommand.MOVE_UP:
+            curRow = Mathf.Max(0, curRow-1);
+            break;
+          case MoveCommand.MOVE_DOWN:
+            curRow = Mathf.Min(NumRows-1, curRow + 1);
+            break;
+          case MoveCommand.MOVE_LEFT:
+            curCol = Mathf.Max(0, curCol - 1);
+            break;
+          case MoveCommand.MOVE_RIGHT:
+            curCol = Mathf.Min(NumCols - 1, curCol + 1);
+            break;
+        }
+        if(Grid[curRow, curCol] == CellType.CELL_IS_WALL) {
+          Debug.Log("The solution goes inside walls!");
+          return false;
+        }
+      }
+      if(curRow == EndRow && curCol == EndCol) {
+        return true;
+      }
+      return false;
+    }
+
+    public bool SolveMaze(List<MoveCommand> commands) {
+      this.commands = commands;
+      if (CheckSolution()) {
+        GetComponent<MazeMovement>().ActivatePlayer(StartRow, StartCol);
+        curCmdIndex = 0;
+        solveMaze = true;
+        executeNextCmd = true;
+        return true;
+      } else {
+        Debug.Log("Solution is no good!");
+        return false;
+      }
+    }
+
+    public void MoveCommandComplete() {
+      executeNextCmd = true;
+    }
+
+    void Update() {
+      if (solveMaze) {
+        if(executeNextCmd) {
+          if(commands.Count > curCmdIndex) {
+            GetComponent<MazeMovement>().ExecuteMoveCommand(commands[curCmdIndex]);
+            curCmdIndex++;
+            executeNextCmd = false;
+          } else {
+            Debug.Log("Destination Reached!!!");
+            solveMaze = false;
+          }
+        }
+      }
     }
   }
 }
