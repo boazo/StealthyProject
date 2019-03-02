@@ -45,9 +45,9 @@ namespace MazeProject {
     }
 
     public void ActivatePlayer(int row, int col) {
-      float size = maze.GetCellSize();
+      float size = GetComponent<Maze>().GetCellSize();
       player.gameObject.SetActive(true);
-      player.position = new Vector3(size * row, size * col);
+      player.position = new Vector3(size * col, size * row);
     }
 
     public void ExecuteMoveCommand(MoveCommand cmd) {

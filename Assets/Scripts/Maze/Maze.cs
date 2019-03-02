@@ -57,7 +57,7 @@ namespace MazeProject {
     }
 
     Dictionary<ColRow, GameObject> ColRowToGameObjects = new Dictionary<ColRow, GameObject>(new ColRowEqualityComparer());
-    Dictionary<ColRow, Dictionary<string, object>> ColRowToMetadata = new Dictionary<ColRow, Dictionary<string, object>>();
+    Dictionary<ColRow, Dictionary<string, object>> ColRowToMetadata = new Dictionary<ColRow, Dictionary<string, object>>(new ColRowEqualityComparer());
 
     public void InitMazeFromFile(string filename) {
       string dataPath = Path.Combine(Application.persistentDataPath, filename);
@@ -66,7 +66,7 @@ namespace MazeProject {
       List<string> gridAsString = new List<string>();
       int cols = 0;
       int rows = 0;
-      StartRow = int.Parse( reader.ReadLine());
+      StartRow = int.Parse(reader.ReadLine());
       StartCol = int.Parse(reader.ReadLine());
       EndRow = int.Parse(reader.ReadLine());
       EndCol = int.Parse(reader.ReadLine());
@@ -105,7 +105,7 @@ namespace MazeProject {
           newWall.transform.SetParent(row.transform);
           newWall.name = i.ToString() + "_" + j.ToString();
           Wall wall = newWall.GetComponent<Wall>();
-          newWall.transform.position = new Vector3(wall.GetCellSize() * i, wall.GetCellSize() * j, 0);
+          newWall.transform.position = new Vector3(wall.GetCellSize() * j, wall.GetCellSize() * i, 0);
           CellSize = wall.GetCellSize();
           ColRowToGameObjects.Add(new ColRow(i, j), newWall);
           SetCellType(i, j, CellType.CELL_IS_EMPTY);
@@ -137,13 +137,18 @@ namespace MazeProject {
 
     // Associate a metadata attribute with a given maze cell
     public void SetMetadata(int row, int col, string attribute, object data) {
-      var metadata = ColRowToMetadata[new ColRow(row, col)];
-      if (metadata == null) {
+      ColRow key = new ColRow(row, col);
+      Dictionary<string, object> metadata = null; 
+      if (!ColRowToMetadata.ContainsKey(key)) {
         metadata = new Dictionary<string, object>();
-        ColRowToMetadata[new ColRow(row, col)] = metadata;
-      }
+        ColRowToMetadata[key] = metadata;
+      } 
+      metadata = ColRowToMetadata[key];      
+
       if (metadata.ContainsKey(attribute)) {
         metadata[attribute] = data;
+      } else {
+        metadata.Add(attribute, data);
       }
     }
 
@@ -151,8 +156,9 @@ namespace MazeProject {
     // or null if no such attribute was previously associated.
     public object GetMetadata(int row, int col, string attribute) {
       object ret = null;
-      var metadata = ColRowToMetadata[new ColRow(row, col)];
-      if (metadata != null) {
+      ColRow key = new ColRow(row, col);
+      if (ColRowToMetadata.ContainsKey(key)) {
+        var metadata = ColRowToMetadata[key];
         if (metadata.ContainsKey(attribute)) {
           ret = metadata[attribute];
         }
@@ -205,8 +211,8 @@ namespace MazeProject {
       float size = GetCellSize();
       StartMarker.SetActive(true);
       EndMarker.SetActive(true);
-      StartMarker.transform.position = new Vector3(srow * size, scol * size, 0f);
-      EndMarker.transform.position = new Vector3(erow * size, ecol * size, 0f);
+      StartMarker.transform.position = new Vector3(scol * size, srow * size, 0f);
+      EndMarker.transform.position = new Vector3(ecol * size, erow * size, 0f);
     }
 
     // returns the coordinates of the start and end points
