@@ -24,6 +24,7 @@ namespace BorderMazeGenerator {
           }
         }
       }
+      maze.SetStartEndPoints(1, 1, NumRows - 2, NumCols - 2);
       maze.SaveMaze("border_maze_generator.txt");
 
     }
@@ -33,11 +34,24 @@ namespace BorderMazeGenerator {
       maze.InitMazeFromFile("border_maze_generator.txt");
 
     }
+
+    void TestCommandExecution() {
+      List<MoveCommand> commands = new List<MoveCommand>();
+      for (int i = 0; i < 17; i++) {
+        commands.Add(MoveCommand.MOVE_UP);
+      }
+      for (int i = 0; i < 17; i++) {
+        commands.Add(MoveCommand.MOVE_RIGHT);
+      }
+      var maze = theMaze.GetComponent<IMaze>();
+      maze.SolveMaze(commands);
+    }
     void Start() {
       if (generate) {
         GenerateBorder();
       } else {
         LoadBorderFromFile();
+        TestCommandExecution();
       }
     }
   }

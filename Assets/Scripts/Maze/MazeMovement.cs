@@ -5,14 +5,13 @@ using UnityEngine;
 namespace MazeProject {
   public class MazeMovement : MonoBehaviour {
 
-    public float speed = 2f;
+    public float speed = 20f;
     public Transform player;
 
     private Maze maze;
     private bool move = false;
     private Vector3 endMarker;
     private Vector3 startMarker;
-    private Vector3 velocity;
 
     // Time when the movement started.
     private float startTime;
@@ -54,18 +53,19 @@ namespace MazeProject {
     public void ExecuteMoveCommand(MoveCommand cmd) {
       move = true;
       float size = maze.GetCellSize();
+      Vector3 velocity = Vector3.zero;
       switch (cmd) {
         case MoveCommand.MOVE_UP:
-          velocity = new Vector3(0, speed, 0);
+          velocity = new Vector3(0, 1, 0);
           break;
         case MoveCommand.MOVE_DOWN:
-          velocity = new Vector3(0, -speed, 0);
+          velocity = new Vector3(0, -1, 0);
           break;
         case MoveCommand.MOVE_LEFT:
-          velocity = new Vector3(-speed, 0, 0);
+          velocity = new Vector3(-1, 0, 0);
           break;
         case MoveCommand.MOVE_RIGHT:
-          velocity = new Vector3(speed, 0, 0);
+          velocity = new Vector3(1, 0, 0);
           break;
       }
       startMarker = player.position;

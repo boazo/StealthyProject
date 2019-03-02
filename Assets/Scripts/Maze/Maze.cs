@@ -9,6 +9,9 @@ namespace MazeProject {
     [Tooltip("A wall in the maze")]
     public GameObject WallPrefab;
 
+    public GameObject StartMarker;
+    public GameObject EndMarker;
+
     private int StartRow;
     private int StartCol;
     private int EndRow;
@@ -18,7 +21,7 @@ namespace MazeProject {
     private int NumCols;
 
     private CellType[,] Grid;
-    
+
     private float CellSize;
 
     private List<MoveCommand> commands;
@@ -63,6 +66,11 @@ namespace MazeProject {
       List<string> gridAsString = new List<string>();
       int cols = 0;
       int rows = 0;
+      StartRow = int.Parse( reader.ReadLine());
+      StartCol = int.Parse(reader.ReadLine());
+      EndRow = int.Parse(reader.ReadLine());
+      EndCol = int.Parse(reader.ReadLine());
+
       while (!reader.EndOfStream) {
         gridAsString.Add(reader.ReadLine());
       }
@@ -80,6 +88,7 @@ namespace MazeProject {
           }
         }
       }
+      SetStartEndPoints(StartRow, StartCol, EndRow, EndCol);
     }
 
     public void InitMaze(int numRows, int numCols) {
@@ -133,7 +142,7 @@ namespace MazeProject {
         metadata = new Dictionary<string, object>();
         ColRowToMetadata[new ColRow(row, col)] = metadata;
       }
-      if(metadata.ContainsKey(attribute)) {
+      if (metadata.ContainsKey(attribute)) {
         metadata[attribute] = data;
       }
     }
@@ -143,7 +152,7 @@ namespace MazeProject {
     public object GetMetadata(int row, int col, string attribute) {
       object ret = null;
       var metadata = ColRowToMetadata[new ColRow(row, col)];
-      if(metadata != null) {
+      if (metadata != null) {
         if (metadata.ContainsKey(attribute)) {
           ret = metadata[attribute];
         }
@@ -169,6 +178,10 @@ namespace MazeProject {
     public void SaveMaze(string name) {
       string dataPath = Path.Combine(Application.persistentDataPath, name);
       StreamWriter writer = new StreamWriter(dataPath);
+      writer.WriteLine(StartRow);
+      writer.WriteLine(StartCol);
+      writer.WriteLine(EndRow);
+      writer.WriteLine(EndCol);
 
       for (int i = 0; i < NumRows; i++) {
         for (int j = 0; j < NumCols; j++) {
@@ -189,6 +202,11 @@ namespace MazeProject {
       StartCol = scol;
       EndRow = erow;
       EndCol = ecol;
+      float size = GetCellSize();
+      StartMarker.SetActive(true);
+      EndMarker.SetActive(true);
+      StartMarker.transform.position = new Vector3(srow * size, scol * size, 0f);
+      EndMarker.transform.position = new Vector3(erow * size, ecol * size, 0f);
     }
 
     // returns the coordinates of the start and end points
@@ -205,10 +223,10 @@ namespace MazeProject {
       for (int i = 0; i < commands.Count; i++) {
         switch (commands[i]) {
           case MoveCommand.MOVE_UP:
-            curRow = Mathf.Max(0, curRow-1);
+            curRow = Mathf.Min(NumRows - 1, curRow + 1);
             break;
           case MoveCommand.MOVE_DOWN:
-            curRow = Mathf.Min(NumRows-1, curRow + 1);
+            curRow = Mathf.Max(0, curRow - 1); 
             break;
           case MoveCommand.MOVE_LEFT:
             curCol = Mathf.Max(0, curCol - 1);
@@ -217,12 +235,12 @@ namespace MazeProject {
             curCol = Mathf.Min(NumCols - 1, curCol + 1);
             break;
         }
-        if(Grid[curRow, curCol] == CellType.CELL_IS_WALL) {
+        if (Grid[curRow, curCol] == CellType.CELL_IS_WALL) {
           Debug.Log("The solution goes inside walls!");
           return false;
         }
       }
-      if(curRow == EndRow && curCol == EndCol) {
+      if (curRow == EndRow && curCol == EndCol) {
         return true;
       }
       return false;
@@ -248,8 +266,8 @@ namespace MazeProject {
 
     void Update() {
       if (solveMaze) {
-        if(executeNextCmd) {
-          if(commands.Count > curCmdIndex) {
+        if (executeNextCmd) {
+          if (commands.Count > curCmdIndex) {
             GetComponent<MazeMovement>().ExecuteMoveCommand(commands[curCmdIndex]);
             curCmdIndex++;
             executeNextCmd = false;
