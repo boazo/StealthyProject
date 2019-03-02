@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 
 namespace MazeProject {
 
@@ -12,7 +13,7 @@ namespace MazeProject {
     private int NumCols;
 
     private CellType[,] Grid;
-
+    
     private float CellSize;
 
     class ColRow {
@@ -43,6 +44,33 @@ namespace MazeProject {
     }
 
     Dictionary<ColRow, GameObject> ColRowToGameObjects = new Dictionary<ColRow, GameObject>(new ColRowEqualityComparer());
+    Dictionary<ColRow, Dictionary<string, object>> ColRowToMetadata = new Dictionary<ColRow, Dictionary<string, object>>();
+
+    public void InitMazeFromFile(string filename) {
+      string dataPath = Path.Combine(Application.persistentDataPath, filename);
+      StreamReader reader = new StreamReader(dataPath);
+
+      List<string> gridAsString = new List<string>();
+      int cols = 0;
+      int rows = 0;
+      while (!reader.EndOfStream) {
+        gridAsString.Add(reader.ReadLine());
+      }
+      cols = gridAsString[0].Length;
+      rows = gridAsString.Count;
+      InitMaze(rows, cols);
+
+      for (int i = 0; i < NumRows; i++) {
+        for (int j = 0; j < NumCols; j++) {
+          int cell = gridAsString[i][j] - '0';
+          if (cell == 0) {
+            SetCellType(i, j, CellType.CELL_IS_EMPTY);
+          } else {
+            SetCellType(i, j, CellType.CELL_IS_WALL);
+          }
+        }
+      }
+    }
 
     public void InitMaze(int numRows, int numCols) {
       NumRows = numRows;
@@ -88,8 +116,61 @@ namespace MazeProject {
       return Grid[row, col];
     }
 
+    // Associate a metadata attribute with a given maze cell
+    public void SetMetadata(int row, int col, string attribute, object data) {
+      var metadata = ColRowToMetadata[new ColRow(row, col)];
+      if (metadata == null) {
+        metadata = new Dictionary<string, object>();
+        ColRowToMetadata[new ColRow(row, col)] = metadata;
+      }
+      if(metadata.ContainsKey(attribute)) {
+        metadata[attribute] = data;
+      }
+    }
+
+    // Retrieve the metadata attribute associated with a given cell,
+    // or null if no such attribute was previously associated.
+    public object GetMetadata(int row, int col, string attribute) {
+      object ret = null;
+      var metadata = ColRowToMetadata[new ColRow(row, col)];
+      if(metadata != null) {
+        if (metadata.ContainsKey(attribute)) {
+          ret = metadata[attribute];
+        }
+      }
+      return ret;
+    }
+
     public float GetCellSize() {
       return CellSize;
+    }
+
+    // returns the number of rows the maze was initialized to
+    public int GetNumRows() {
+      return NumRows;
+    }
+
+    // returns the number of columns the maze was initialized to
+    public int GetNumColumns() {
+      return NumCols;
+    }
+
+    // saves the maze to the disk
+    public void SaveMaze(string name) {
+      string dataPath = Path.Combine(Application.persistentDataPath, name);
+      StreamWriter writer = new StreamWriter(dataPath);
+
+      for (int i = 0; i < NumRows; i++) {
+        for (int j = 0; j < NumCols; j++) {
+          string value = "1";
+          if (Grid[i, j] == CellType.CELL_IS_EMPTY) {
+            value = "0";
+          }
+          writer.Write(value);
+        }
+        writer.Write(writer.NewLine);
+      }
+      writer.Close();
     }
   }
 }

@@ -8,8 +8,9 @@ namespace BorderMazeGenerator {
     public int NumRows;
     public int NumCols;
     public GameObject theMaze;
+    public bool generate = true;
 
-    void Start() {
+    void GenerateBorder() {
       var maze = theMaze.GetComponent<IMaze>();
       maze.InitMaze(NumRows, NumCols);
 
@@ -22,6 +23,21 @@ namespace BorderMazeGenerator {
             maze.SetCellType(i, j, CellType.CELL_IS_WALL);
           }
         }
+      }
+      maze.SaveMaze("border_maze_generator.txt");
+
+    }
+
+    void LoadBorderFromFile() {
+      var maze = theMaze.GetComponent<IMaze>();
+      maze.InitMazeFromFile("border_maze_generator.txt");
+
+    }
+    void Start() {
+      if (generate) {
+        GenerateBorder();
+      } else {
+        LoadBorderFromFile();
       }
     }
   }
